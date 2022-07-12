@@ -48,7 +48,8 @@ jobs:
       - name: Generate client code in Java
         run:  |
           mkdir output
-          openapi-generator-cli generate -i ${{ inputs.fileName }} -g ${{ ${{ inputs.language }} }} -o output/
+          if ${{ inputs.language }} == NodeJs; then LANG = ${{NodeJs}}; elif ${{ inputs.language }} == Java; then LANG = ${{Java}}; elif ${{ inputs.language }} == GoLang; then LANG = ${{go}}; else LANG = null; fi
+          openapi-generator-cli generate -i ${{ inputs.fileName }} -g $(echo $LANG) -o output/
       - name: Copy tagVersion
         run: cp ${{ inputs.versionFile }} output/
       - name: Pushes to another repository
