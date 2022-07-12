@@ -40,7 +40,7 @@ jobs:
       - name: Generate client code
         run:  |
           mkdir output
-          if [ ${{ inputs.language }} = "NodeJs" ]; then export LANG=nodejs-express-server; elif [ ${{ inputs.language }} = "Java" ]; then export LANG=java; elif [ ${{ inputs.language }} = "GoLang" ]; then export LANG=go; else export LANG=null;
+          if [ ${{ inputs.language }} = "NodeJs" ]; then export LANG=nodejs-express-server; elif [ ${{ inputs.language }} = "Java" ]; then export LANG=java; elif [ ${{ inputs.language }} = "GoLang" ]; then export LANG=go; else export LANG=null; fi
           echo "Language is $LANG"
           openapi-generator-cli generate -i ${{ inputs.fileName }} -g $(echo $LANG) -o output/
       - name: Copy tagVersion
