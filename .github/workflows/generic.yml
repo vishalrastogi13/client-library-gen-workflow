@@ -48,7 +48,7 @@ jobs:
       - name: Generate client code in Java
         run:  |
           mkdir output
-          if ${{ inputs.language }} == NodeJs; then LANG = $NodeJs; elif ${{ inputs.language }} == Java; then LANG = $Java; elif ${{ inputs.language }} == GoLang; then LANG = $GoLang; else LANG = null; fi
+          if "${{ inputs.language }}" -eq "NodeJs"; then LANG = $NodeJs; elif ${{ inputs.language }} == Java; then LANG = $Java; elif ${{ inputs.language }} == GoLang; then LANG = $GoLang; else LANG = null; fi
           openapi-generator-cli generate -i ${{ inputs.fileName }} -g $(echo $LANG) -o output/
       - name: Copy tagVersion
         run: cp ${{ inputs.versionFile }} output/
