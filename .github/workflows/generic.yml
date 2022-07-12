@@ -24,13 +24,6 @@ on:
       releaseNotes:
         required: true
         type: string
-        
-      
-
-env:
-  NodeJs: nodejs-express-server
-  Java: java
-  GoLang: go
 
 jobs:
   update-client:
@@ -44,8 +37,7 @@ jobs:
           node-version: 14.x
       - name: Install openapi generator
         run:  npm install @openapitools/openapi-generator-cli -g
-        
-      - name: Generate client code in Java
+      - name: Generate client code
         run:  |
           mkdir output
           if [ ${{ inputs.language }} = "NodeJs" ]; then
@@ -56,7 +48,7 @@ jobs:
             export LANG=go
           else
             export LANG=null
-          echo $LANG
+          echo "Language is $LANG"
           openapi-generator-cli generate -i ${{ inputs.fileName }} -g $(echo $LANG) -o output/
       - name: Copy tagVersion
         run: cp ${{ inputs.versionFile }} output/
