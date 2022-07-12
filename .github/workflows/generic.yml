@@ -47,7 +47,7 @@ jobs:
         run: cp ${{ inputs.versionFile }} output/
       - name: Pushes to another repository
         id: push_directory
-        uses: cpina/github-action-push-to-another-repository@devel
+        uses: cpina/github-action-push-to-another-repository@ssh-deploy-key
         env:
           SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         with:
