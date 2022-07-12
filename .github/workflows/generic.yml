@@ -30,7 +30,7 @@ on:
 env:
   NodeJs: nodejs-express-server
   Java: java
-  GoLang: go      
+  GoLang: go
 
 jobs:
   update-client:
@@ -48,7 +48,15 @@ jobs:
       - name: Generate client code in Java
         run:  |
           mkdir output
-          if "${{ inputs.language }}" -eq "NodeJs"; then LANG = $NodeJs; elif ${{ inputs.language }} == Java; then LANG = $Java; elif ${{ inputs.language }} == GoLang; then LANG = $GoLang; else LANG = null; fi
+          if [ ${{ inputs.language }} = "NodeJs" ]; then
+            export LANG=nodejs-express-server
+          elif [ ${{ inputs.language }} = "Java" ]; then
+            export LANG=java
+          elif [ ${{ inputs.language }} = "GoLang" ]; then
+            export LANG=go
+          else
+            export LANG=null
+          echo $LANG
           openapi-generator-cli generate -i ${{ inputs.fileName }} -g $(echo $LANG) -o output/
       - name: Copy tagVersion
         run: cp ${{ inputs.versionFile }} output/
