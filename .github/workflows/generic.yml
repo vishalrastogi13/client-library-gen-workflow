@@ -1,0 +1,105 @@
+name: Client Library Workflow
+
+on:
+  workflow_call:
+    inputs:
+      language:
+        required: true
+        type: string
+      fileName:
+        required: true
+        type: string
+      versionFile:
+        required: true
+        type: string
+      destination-repository-name:
+        required: true
+        type: string
+      target-branch:
+        required: true
+        type: string
+      user-email:
+        required: true
+        type: string
+      releaseNotes:
+        required: true
+        type: string
+        
+      
+
+env:
+  NodeJs: nodejs-express-server
+  Java: java
+  GoLang: go      
+
+jobs:
+  update-client:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout source code'
+        uses: actions/checkout@v3
+      - name: 'Setup Node'
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14.x
+      - name: Install openapi generator
+        run:  npm install @openapitools/openapi-generator-cli -g
+        
+      - name: Generate client code in Java
+        run:  |
+          mkdir output
+          openapi-generator-cli generate -i ${{ inputs.fileName }} -g ${{ ${{ inputs.language }} }} -o output/
+      - name: Copy tagVersion
+        run: cp ${{ inputs.versionFile }} output/
+      - name: Pushes to another repository
+        id: push_directory
+        uses: cpina/github-action-push-to-another-repository@devel
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: output/
+          destination-github-username: 'ShareChat'
+          destination-repository-name: ${{ inputs.destination-repository-name }}
+          user-email: ${{ inputs.user-email }}
+          commit-message: ORIGIN_COMMIT from $GITHUB_REF
+          target-branch: ${{ inputs.target-branch }}
+
+  update-tag:
+    needs: update-client
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag_version.outputs.tag }}
+    steps:
+      - name: 'Checkout source code'
+        uses: actions/checkout@v3
+        with:
+          repository: ShareChat/${{ inputs.destination-repository-name }}
+          token: ${{ secrets.API_TOKEN_GITHUB }}
+      - name: Read version file to get tag version
+        id: custom-tag
+        run: |
+          TAG=`cat ${{ inputs.versionFile }} | grep -o 'version:[^:]*' | cut -f2 -d":" | xargs`
+          echo "::set-output name=tag::$(echo $TAG)"
+        shell: bash
+      - name: Bump version and push tag
+        id: tag_version
+        uses: vishalrastogi13/tag-update-action-copy@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
+          custom_tag: ${{ steps.custom-tag.outputs.tag }}
+          repository: ShareChat/${{ inputs.destination-repository-name }}
+
+  create-release:
+    needs: update-tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          tag_name: ${{ needs.update-tag.outputs.tag }}
+          name: Release ${{  needs.update-tag.outputs.tag }}
+          repository: ShareChat/${{ inputs.destination-repository-name }}
+          body: ${{ inputs.releaseNotes }}
