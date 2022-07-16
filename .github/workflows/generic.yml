@@ -51,8 +51,6 @@ jobs:
       - name: Pushes to another repository
         id: push_directory
         uses: cpina/github-action-push-to-another-repository@ssh-deploy-key
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         with:
           source-directory: output/
           destination-github-username: 'ShareChat'
@@ -60,6 +58,7 @@ jobs:
           user-email: ${{ inputs.user-email }}
           commit-message: ORIGIN_COMMIT from $GITHUB_REF
           target-branch: ${{ inputs.target-branch }}
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
 
   update-tag:
     needs: update-client
