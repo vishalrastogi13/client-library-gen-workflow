@@ -24,6 +24,9 @@ on:
       releaseNotes:
         required: true
         type: string
+    secrets: 
+      SSH_DEPLOY_KEY:
+        required: true
 
 jobs:
   update-client:
