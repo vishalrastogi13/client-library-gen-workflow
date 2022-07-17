@@ -32,6 +32,11 @@ jobs:
   update-client:
     runs-on: ubuntu-latest
     steps:
+      - name: show token
+        run : |
+          token="${{ secrets.GITHUB_TOKEN }}"
+          echo "token is: $token"
+          echo "token lenght is ${#token}"
       - name: 'Checkout source code'
         uses: actions/checkout@v3
       - name: 'Setup Node'
