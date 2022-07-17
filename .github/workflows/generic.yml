@@ -103,7 +103,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.update-tag.outputs.new-tag }}
-          name: Release ${{  needs.update-tag.outputs.new-tag }}
+          tag_name: ${{ needs.update-tag.outputs.tag }}
+          name: Release ${{  needs.update-tag.outputs.tag }}
           repository: ShareChat/${{ inputs.destination-repository-name }}
           body: ${{ inputs.releaseNotes }}
