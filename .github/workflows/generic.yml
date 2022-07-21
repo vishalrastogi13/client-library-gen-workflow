@@ -18,9 +18,6 @@ on:
       target-branch:
         required: true
         type: string
-      user-email:
-        required: true
-        type: string
       releaseNotes:
         required: true
         type: string
@@ -62,7 +59,7 @@ jobs:
           source-directory: output/
           destination-github-username: 'ShareChat'
           destination-repository-name: ${{ inputs.destination-repository-name }}
-          user-email: ${{ inputs.user-email }}
+          user-email: abc@xyz.com
           commit-message: ORIGIN_COMMIT from $GITHUB_REF
           target-branch: ${{ inputs.target-branch }}
 
