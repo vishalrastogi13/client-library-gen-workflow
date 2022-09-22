@@ -6,10 +6,10 @@ on:
       language:
         required: true
         type: string
-      fileName:
+      file-name:
         required: true
         type: string
-      versionFile:
+      version-file:
         required: true
         type: string
       destination-repository-name:
@@ -18,7 +18,7 @@ on:
       target-branch:
         required: true
         type: string
-      releaseNotes:
+      release-notes:
         required: true
         type: string
     secrets: 
@@ -29,11 +29,6 @@ jobs:
   update-client:
     runs-on: ubuntu-latest
     steps:
-      - name: show token
-        run : |
-          token="${{ secrets.API_TOKEN_GITHUB }}"
-          echo "token is: $token"
-          echo "token lenght is ${#token}"
       - name: 'Checkout source code'
         uses: actions/checkout@v3
       - name: 'Setup Node'
@@ -45,14 +40,14 @@ jobs:
       - name: Generate client code
         run:  |
           mkdir output
-          if [ ${{ inputs.language }} = "NodeJs" ]; then export LANG=nodejs-express-server; elif [ ${{ inputs.language }} = "Java" ]; then export LANG=java; elif [ ${{ inputs.language }} = "GoLang" ]; then export LANG=go; else export LANG=null; fi
+          if [ ${{ inputs.language }} = "NodeJs" ]; then export LANG=javascript; elif [ ${{ inputs.language }} = "Java" ]; then export LANG=java; elif [ ${{ inputs.language }} = "GoLang" ]; then export LANG=go; else export LANG=null; fi
           echo "Language is $LANG"
-          openapi-generator-cli generate -i ${{ inputs.fileName }} -g $(echo $LANG) -o output/
+          openapi-generator-cli generate -i ${{ inputs.file-name }} -g $(echo $LANG) -o output/
       - name: Copy tagVersion
-        run: cp ${{ inputs.versionFile }} output/
+        run: cp ${{ inputs.version-file }} output/
       - name: Pushes to another repository
         id: push_directory
-        uses: cpina/github-action-push-to-another-repository@devel
+        uses: ShareChat/github-action-push-to-another-repo@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
@@ -77,12 +72,12 @@ jobs:
       - name: Read version file to get tag version
         id: custom-tag
         run: |
-          TAG=`cat ${{ inputs.versionFile }} | grep -o 'version:[^:]*' | cut -f2 -d":" | xargs`
+          TAG=`cat ${{ inputs.version-file }} | grep -o 'version:[^:]*' | cut -f2 -d":" | xargs`
           echo "::set-output name=tag::$(echo $TAG)"
         shell: bash
       - name: Bump version and push tag
         id: tag_version
-        uses: vishalrastogi13/tag-update-action-copy@main
+        uses: ShareChat/tag-update-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           custom_tag: ${{ steps.custom-tag.outputs.tag }}
@@ -94,11 +89,11 @@ jobs:
     steps:
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: ShareChat/github-action-create-release@main
         env:
           GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           tag_name: ${{ needs.update-tag.outputs.tag }}
           name: Release ${{  needs.update-tag.outputs.tag }}
           repository: ShareChat/${{ inputs.destination-repository-name }}
-          body: ${{ inputs.releaseNotes }}
+          body: ${{ inputs.release-notes }}
